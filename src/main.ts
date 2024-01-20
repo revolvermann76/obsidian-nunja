@@ -4,6 +4,9 @@ import { TPluginSettings } from "./types/TPluginSettings";
 import { TNote } from "./types/TNote";
 import { TSnippet } from "./types/TSnippet";
 import { SettingTab } from "./SettingTab";
+import * as nunjucks from 'nunjucks';
+
+const CODEFENCE_NAME = "nunja";
 
 const DEFAULT_SETTINGS: TPluginSettings = {
 	templatePath: "templates",
@@ -30,7 +33,7 @@ export default class ObsidianNunjaPlugin extends Plugin {
 		// });
 
 		this.registerMarkdownCodeBlockProcessor(
-			'nunja',
+			CODEFENCE_NAME,
 			async (source, el, ctx) => this.#blockHandler(source, el, ctx)
 		)
 
@@ -61,6 +64,9 @@ export default class ObsidianNunjaPlugin extends Plugin {
 	#blockHandler = debounce(
 		async (source: string, container: HTMLElement, ctx: MarkdownPostProcessorContext) => {
 
+			const rendered = nunjucks.renderString(`<h1>Hello, {{ name }}!</h1>`, { name: 'Nunjucks' });
+			console.log(rendered)
+			container.innerHTML = rendered;
 		},
 		250,
 	)

@@ -7,7 +7,7 @@ export async function writeStringToFile(filePath: string, content: string, app: 
 		await app.vault.create(normalizePath(filePath), content, {});
 		return;
 	} else {
-		if(file instanceof TFile){
+		if (file instanceof TFile) {
 			await app.vault.modify(file as TFile, content);
 			return;
 		} else {
