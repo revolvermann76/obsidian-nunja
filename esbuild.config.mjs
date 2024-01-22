@@ -19,8 +19,8 @@ const copyPlugin = () => ({
 	setup(build) {
 		build.onEnd(async () => {
 			const pathIn = "./";
-			//const pathOut =	"D:/.obsidian/plugins/obsidian-nunja/";
-			const pathOut = "/home/marc/zettelkasten/.obsidian/plugins/obsidian-nunja/";
+			const pathOut =	"D:/.obsidian/plugins/obsidian-nunja/";
+			//const pathOut = "/home/marc/zettelkasten/.obsidian/plugins/obsidian-nunja/";
 			const files = [
 				"manifest.json",
 				"main.js",

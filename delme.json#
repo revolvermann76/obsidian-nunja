@@ -1,0 +1,279 @@
+{
+  "basename": "2024-01-21",
+  "name": "2024-01-21.md",
+  "path": "root/notes/diary/2024-01-21.md",
+  "extension": "md",
+  "metadata": {
+    "headings": [
+      {
+        "heading": "Sonntag, 21. Januar 2024",
+        "level": 1,
+        "position": {
+          "start": {
+            "line": 6,
+            "col": 0,
+            "offset": 67
+          },
+          "end": {
+            "line": 6,
+            "col": 26,
+            "offset": 93
+          }
+        }
+      },
+      {
+        "heading": "Feelings",
+        "level": 2,
+        "position": {
+          "start": {
+            "line": 10,
+            "col": 0,
+            "offset": 764
+          },
+          "end": {
+            "line": 10,
+            "col": 11,
+            "offset": 775
+          }
+        }
+      },
+      {
+        "heading": "Upside",
+        "level": 2,
+        "position": {
+          "start": {
+            "line": 14,
+            "col": 0,
+            "offset": 798
+          },
+          "end": {
+            "line": 14,
+            "col": 9,
+            "offset": 807
+          }
+        }
+      },
+      {
+        "heading": "Downside",
+        "level": 2,
+        "position": {
+          "start": {
+            "line": 16,
+            "col": 0,
+            "offset": 809
+          },
+          "end": {
+            "line": 16,
+            "col": 11,
+            "offset": 820
+          }
+        }
+      },
+      {
+        "heading": "Thoughts",
+        "level": 2,
+        "position": {
+          "start": {
+            "line": 18,
+            "col": 0,
+            "offset": 822
+          },
+          "end": {
+            "line": 18,
+            "col": 11,
+            "offset": 833
+          }
+        }
+      },
+      {
+        "heading": "Tasks",
+        "level": 2,
+        "position": {
+          "start": {
+            "line": 20,
+            "col": 0,
+            "offset": 835
+          },
+          "end": {
+            "line": 20,
+            "col": 8,
+            "offset": 843
+          }
+        }
+      }
+    ],
+    "sections": [
+      {
+        "type": "yaml",
+        "position": {
+          "start": {
+            "line": 0,
+            "col": 0,
+            "offset": 0
+          },
+          "end": {
+            "line": 5,
+            "col": 3,
+            "offset": 66
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "position": {
+          "start": {
+            "line": 6,
+            "col": 0,
+            "offset": 67
+          },
+          "end": {
+            "line": 6,
+            "col": 26,
+            "offset": 93
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "position": {
+          "start": {
+            "line": 8,
+            "col": 0,
+            "offset": 95
+          },
+          "end": {
+            "line": 8,
+            "col": 667,
+            "offset": 762
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "position": {
+          "start": {
+            "line": 10,
+            "col": 0,
+            "offset": 764
+          },
+          "end": {
+            "line": 10,
+            "col": 11,
+            "offset": 775
+          }
+        }
+      },
+      {
+        "type": "paragraph",
+        "position": {
+          "start": {
+            "line": 12,
+            "col": 0,
+            "offset": 777
+          },
+          "end": {
+            "line": 12,
+            "col": 19,
+            "offset": 796
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "position": {
+          "start": {
+            "line": 14,
+            "col": 0,
+            "offset": 798
+          },
+          "end": {
+            "line": 14,
+            "col": 9,
+            "offset": 807
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "position": {
+          "start": {
+            "line": 16,
+            "col": 0,
+            "offset": 809
+          },
+          "end": {
+            "line": 16,
+            "col": 11,
+            "offset": 820
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "position": {
+          "start": {
+            "line": 18,
+            "col": 0,
+            "offset": 822
+          },
+          "end": {
+            "line": 18,
+            "col": 11,
+            "offset": 833
+          }
+        }
+      },
+      {
+        "type": "heading",
+        "position": {
+          "start": {
+            "line": 20,
+            "col": 0,
+            "offset": 835
+          },
+          "end": {
+            "line": 20,
+            "col": 8,
+            "offset": 843
+          }
+        }
+      },
+      {
+        "type": "code",
+        "position": {
+          "start": {
+            "line": 22,
+            "col": 0,
+            "offset": 845
+          },
+          "end": {
+            "line": 26,
+            "col": 3,
+            "offset": 905
+          }
+        }
+      }
+    ],
+    "frontmatter": {
+      "date": "2024-01-21",
+      "created": "2024-01-22 08:48",
+      "tags": [
+        "diary"
+      ]
+    },
+    "frontmatterLinks": [],
+    "frontmatterPosition": {
+      "start": {
+        "line": 0,
+        "col": 0,
+        "offset": 0
+      },
+      "end": {
+        "line": 5,
+        "col": 3,
+        "offset": 66
+      }
+    }
+  },
+  "engine": "Nunjucks"
+}
