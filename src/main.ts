@@ -1,4 +1,4 @@
-import { CachedMetadata,  MarkdownPostProcessorContext,   Notice,   Plugin, TFile, debounce } from "obsidian";
+import { CachedMetadata,  Component, MarkdownPostProcessorContext, MarkdownRenderer, MarkdownView, Plugin, TFile, debounce } from "obsidian";
 
 import { TPluginSettings } from "./types/TPluginSettings";
 import { TNote } from "./types/TNote";
@@ -8,6 +8,7 @@ import * as nunjucks from 'nunjucks';
 import { getCurrentDate } from "./other/getCurrentDate";
 import { getCurrentTime } from "./other/getCurrentTime";
 import { getCurrentTimestamp } from "./other/getCurrentTimestamp";
+import { AsyncFunction } from "./other/AsyncFunction";
 
 const CODEFENCE_NAME = "nunja";
 
@@ -74,26 +75,26 @@ export default class ObsidianNunjaPlugin extends Plugin {
 		metadata.frontmatterLinks = metadata.frontmatterLinks || [];
 		metadata.headings = metadata.headings || [];
 		metadata.frontmatter = metadata.frontmatter || {};
+		metadata.tags = metadata.tags || [];
+		metadata.frontmatter.tags = metadata.frontmatter.tags || [];
 		const links = [... metadata.links, ...metadata.frontmatterLinks];
+		const tags = [... metadata.tags.map((t)=>t.tag.substring(1)), ... metadata.frontmatter.tags];
 		let title = metadata.frontmatter["title"] || basename;
 		const h1s = metadata.headings.filter((h)=>h.level === 1);
-		if(h1s.length){
-			title = h1s[0].heading;
-		}
-		return { basename, name, path, extension, title, links, metadata};
+		title = h1s.length ? h1s[0].heading :title;
+		
+		return { basename, name, path, extension, title, tags, links, metadata};
 	}
 
 	#blockHandler = debounce(
 		async (source: string, container: HTMLElement, ctx: MarkdownPostProcessorContext) => {
+
 			const environment = nunjucks.configure({});
 			const file: TFile = this.app.workspace.getActiveFile() as TFile;
 
 			const context = { 
 				...this.#noteRecord(file), 
-				... { 
-					date : getCurrentDate,
-					time : getCurrentTime,
-					timestamp : getCurrentTimestamp,
+				... {
 					metadata: () => this.#noteRecord(file),
 					app: () => this.app,
 					nunja: () => this,
@@ -101,12 +102,37 @@ export default class ObsidianNunjaPlugin extends Plugin {
 				}
 			};
 
-			environment.addGlobal('context', ()=>{
-				return context;
-			})
-			const rendered = environment.renderString(source, context);
+			environment.addFilter(
+				"js",
+				function (js, callback) {
+					const fn = new AsyncFunction("context" ,js);
+					fn(context).then((result: unknown)=>{
+						callback(null, result)
+					})
+				},
+				true
+			);
+			environment.addGlobal('context', ()=>context);
+			environment.addGlobal("date", getCurrentDate);
+			environment.addGlobal("time", getCurrentTime);
+			environment.addGlobal("timestamp", getCurrentTimestamp);
+			
 			console.log(context)
-			container.innerHTML = rendered;
+
+			environment.renderString(source, context, (err, rendered)=>{
+				if(err){
+					console.error(err);
+				}
+
+				MarkdownRenderer.render(
+					this.app,
+					rendered || "",
+					container,
+					ctx.sourcePath,
+					this.app.workspace.getActiveViewOfType(MarkdownView) as Component
+				)
+				//container.innerHTML = rendered || "";
+			});
 		},
 		250,
 	)
