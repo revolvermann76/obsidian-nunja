@@ -1,5 +1,5 @@
-import { CachedMetadata,  Component, MarkdownPostProcessorContext, MarkdownRenderer, MarkdownView, Plugin, TFile, debounce } from "obsidian";
-
+import { CachedMetadata, Component, MarkdownPostProcessorContext, MarkdownRenderer, MarkdownView, Plugin, TFile, debounce } from "obsidian";
+import * as obsidian from "obsidian";
 import { TPluginSettings } from "./types/TPluginSettings";
 import { TNote } from "./types/TNote";
 import { TSnippet } from "./types/TSnippet";
@@ -28,7 +28,6 @@ type NoteMetadata = {
 	path: string;
 	extension: string;
 	metadata: CachedMetadata;
-	[key: string]: unknown;
 }
 
 export default class ObsidianNunjaPlugin extends Plugin {
@@ -68,6 +67,12 @@ export default class ObsidianNunjaPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	test() {
+		const str = "Hello nunja."
+		console.log(str);
+		return str;
+	}
+
 	#noteRecord(file: TFile): NoteMetadata {
 		const { basename, name, path, extension } = file;
 		const metadata = this.app.metadataCache.getFileCache(file) ?? {};
@@ -77,13 +82,7 @@ export default class ObsidianNunjaPlugin extends Plugin {
 		metadata.frontmatter = metadata.frontmatter || {};
 		metadata.tags = metadata.tags || [];
 		metadata.frontmatter.tags = metadata.frontmatter.tags || [];
-		const links = [... metadata.links, ...metadata.frontmatterLinks];
-		const tags = [... metadata.tags.map((t)=>t.tag.substring(1)), ... metadata.frontmatter.tags];
-		let title = metadata.frontmatter["title"] || basename;
-		const h1s = metadata.headings.filter((h)=>h.level === 1);
-		title = h1s.length ? h1s[0].heading :title;
-		
-		return { basename, name, path, extension, title, tags, links, metadata};
+		return { basename, name, path, extension, metadata };
 	}
 
 	#blockHandler = debounce(
@@ -92,36 +91,81 @@ export default class ObsidianNunjaPlugin extends Plugin {
 			const environment = nunjucks.configure({});
 			const file: TFile = this.app.workspace.getActiveFile() as TFile;
 
-			const context = { 
-				...this.#noteRecord(file), 
+			const context = {
+				...this.#noteRecord(file),
 				... {
-					metadata: () => this.#noteRecord(file),
-					app: () => this.app,
-					nunja: () => this,
-					global: ()=> global
+					global,
+					nunja: this,
+					app: this.app,
+					date: getCurrentDate,
+					title: () => {
+						const noteRecord = this.#noteRecord(file)
+						let title = noteRecord.metadata.frontmatter!["title"] || noteRecord.basename;
+						const h1s = noteRecord.metadata.headings!.filter((h) => h.level === 1);
+						return h1s.length ? h1s[0].heading : title;
+					},
+					time: getCurrentTime,
+					timestamp: getCurrentTimestamp,
+					tags: () => {
+						const noteRecord = this.#noteRecord(file);
+						return [
+							...noteRecord.metadata.tags!.map((t) => t.tag.substring(1)),
+							...noteRecord.metadata.frontmatter!.tags
+						]
+					},
+					links: () => {
+						const noteRecord = this.#noteRecord(file)
+						return [
+							...noteRecord.metadata.links!,
+							...noteRecord.metadata.frontmatterLinks!
+						]
+					}
+					// ... additional record entries ??
 				}
 			};
 
 			environment.addFilter(
 				"js",
 				function (js, callback) {
-					const fn = new AsyncFunction("context" ,js);
-					fn(context).then((result: unknown)=>{
+					const fn = new AsyncFunction("context", "obsidian", "nunja", js);
+					fn(context, obsidian, environment).then((result: unknown) => {
 						callback(null, result)
 					})
 				},
 				true
 			);
-			environment.addGlobal('context', ()=>context);
-			environment.addGlobal("date", getCurrentDate);
-			environment.addGlobal("time", getCurrentTime);
-			environment.addGlobal("timestamp", getCurrentTimestamp);
-			
-			console.log(context)
 
-			environment.renderString(source, context, (err, rendered)=>{
-				if(err){
-					console.error(err);
+			//const noteRecord = this.#noteRecord(file)
+			// environment.addGlobal('title', () => {
+			// 	const noteRecord = this.#noteRecord(file)
+			// 	let title = noteRecord.metadata.frontmatter!["title"] || noteRecord.basename;
+			// 	const h1s = noteRecord.metadata.headings!.filter((h) => h.level === 1);
+			// 	return h1s.length ? h1s[0].heading : title;
+			// });
+			// environment.addGlobal('tags', () => {
+			// 	const noteRecord = this.#noteRecord(file);
+			// 	return [
+			// 		...noteRecord.metadata.tags!.map((t) => t.tag.substring(1)),
+			// 		...noteRecord.metadata.frontmatter!.tags
+			// 	]
+			// });
+			// environment.addGlobal('links', () => {
+			// 	const noteRecord = this.#noteRecord(file)
+			// 	return [
+			// 		...noteRecord.metadata.links!,
+			// 		...noteRecord.metadata.frontmatterLinks!
+			// 	]
+			// });
+			//environment.addGlobal('app', () => this.app);
+			environment.addGlobal('context', () => context);
+			//environment.addGlobal("date", getCurrentDate);
+			//environment.addGlobal("time", getCurrentTime);
+			//environment.addGlobal("timestamp", getCurrentTimestamp);
+
+
+			environment.renderString(source, context, (err, rendered) => {
+				if (err) {
+					rendered = "Unable to render template. " + err.message
 				}
 
 				MarkdownRenderer.render(
