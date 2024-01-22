@@ -15,8 +15,16 @@ const DEFAULT_SETTINGS: TPluginSettings = {
 	debug: false
 };
 
-type NoteMetadata = Pick<TFile, 'basename' | 'name' | 'path' | 'extension'>
+type t2 = Pick<TFile, 'basename' | 'name' | 'path' | 'extension'>
 	& Pick<CachedMetadata, 'frontmatter'>;
+
+type NoteMetadata = {
+	basename: string;
+	name: string;
+	path: string;
+	extension: string;
+	metadata: CachedMetadata
+}
 
 export default class ObsidianNunjaPlugin extends Plugin {
 	settings: TPluginSettings;
@@ -57,14 +65,21 @@ export default class ObsidianNunjaPlugin extends Plugin {
 
 	#noteRecord(file: TFile): NoteMetadata {
 		const { basename, name, path, extension } = file;
-		const { frontmatter } = this.app.metadataCache.getFileCache(file) ?? {};
-		return { basename, name, path, extension, frontmatter };
+		const metadata = this.app.metadataCache.getFileCache(file) ?? {};
+		return { basename, name, path, extension, metadata };
 	}
 
 	#blockHandler = debounce(
 		async (source: string, container: HTMLElement, ctx: MarkdownPostProcessorContext) => {
+			const environment = nunjucks.configure({});
+			const file: TFile = this.app.workspace.getActiveFile() as TFile;
 
-			const rendered = nunjucks.renderString(`<h1>Hello, {{ name }}!</h1>`, { name: 'Nunjucks' });
+			const context = { ...this.#noteRecord(file), ... { engine: 'Nunjucks' } };
+
+			environment.addGlobal('getContext', function () {
+				return context;
+			})
+			const rendered = environment.renderString(source, context);
 			console.log(rendered)
 			container.innerHTML = rendered;
 		},
