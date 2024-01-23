@@ -6,7 +6,7 @@ export type TTemplate = {
 	alias?: string | string[];
 	fields: TField[];
 	javascript?: string;
-	templateString?: string;
+	template?: string;
 }
 
 export type TSnippet = TTemplate & {

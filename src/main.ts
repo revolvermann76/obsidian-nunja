@@ -9,6 +9,7 @@ import { getCurrentDate } from "./other/getCurrentDate";
 import { getCurrentTime } from "./other/getCurrentTime";
 import { getCurrentTimestamp } from "./other/getCurrentTimestamp";
 import { AsyncFunction } from "./other/AsyncFunction";
+import { loadTemplates } from "./other/loadTemplates";
 
 const CODEFENCE_NAME = "nunja";
 
@@ -38,18 +39,27 @@ export default class ObsidianNunjaPlugin extends Plugin {
 
 		this.addSettingTab(new SettingTab(this.app, this)); // This adds a settings tab so the user can configure various aspects of the plugin
 
-		// this.app.workspace.onLayoutReady(async () => {
-		// 	// wait for the layout to be ready before loading the templates, because
-		// 	// we need some Obsidian data-caches to be filled first
-		// 	this.templates = await loadTemplates(this);
-		// });
+		this.app.workspace.onLayoutReady(async () => {
+			// wait for the layout to be ready before loading the templates, because
+			// we need some Obsidian data-caches to be filled first
+			this.templates = await loadTemplates(this);
+		});
 
 		this.registerMarkdownCodeBlockProcessor(
 			CODEFENCE_NAME,
 			async (source, el, ctx) => this.#blockHandler(source, el, ctx)
-		)
+		);
 
-
+		// add the command "Reload templates" that can be triggered anywhere
+		// It can be useful to call it, after you changed some templates
+		this.addCommand({
+			id: "reload-templates",
+			name: "Reload templates",
+			callback: async () => {
+				this.templates = await loadTemplates(this);
+				new Notification("Templates reloaded");
+			},
+		});
 	}
 
 	/** load settings, wenn the Plugin gets loaded */
@@ -76,12 +86,6 @@ export default class ObsidianNunjaPlugin extends Plugin {
 	#noteRecord(file: TFile): NoteMetadata {
 		const { basename, name, path, extension } = file;
 		const metadata = this.app.metadataCache.getFileCache(file) ?? {};
-		metadata.links = metadata.links || [];
-		metadata.frontmatterLinks = metadata.frontmatterLinks || [];
-		metadata.headings = metadata.headings || [];
-		metadata.frontmatter = metadata.frontmatter || {};
-		metadata.tags = metadata.tags || [];
-		metadata.frontmatter.tags = metadata.frontmatter.tags || [];
 		return { basename, name, path, extension, metadata };
 	}
 
@@ -100,8 +104,8 @@ export default class ObsidianNunjaPlugin extends Plugin {
 					date: getCurrentDate,
 					title: () => {
 						const noteRecord = this.#noteRecord(file)
-						let title = noteRecord.metadata.frontmatter!["title"] || noteRecord.basename;
-						const h1s = noteRecord.metadata.headings!.filter((h) => h.level === 1);
+						const title = noteRecord.metadata.frontmatter?.title || noteRecord.basename;
+						const h1s = (noteRecord.metadata.headings || []).filter((h) => h.level === 1);
 						return h1s.length ? h1s[0].heading : title;
 					},
 					time: getCurrentTime,
@@ -109,15 +113,15 @@ export default class ObsidianNunjaPlugin extends Plugin {
 					tags: () => {
 						const noteRecord = this.#noteRecord(file);
 						return [
-							...noteRecord.metadata.tags!.map((t) => t.tag.substring(1)),
-							...noteRecord.metadata.frontmatter!.tags
+							...(noteRecord.metadata.tags || []).map((t) => t.tag.substring(1)),
+							...(noteRecord.metadata.frontmatter || {tags:[]}).tags
 						]
 					},
 					links: () => {
 						const noteRecord = this.#noteRecord(file)
 						return [
-							...noteRecord.metadata.links!,
-							...noteRecord.metadata.frontmatterLinks!
+							...(noteRecord.metadata.links || []),
+							...(noteRecord.metadata.frontmatterLinks || [])
 						]
 					}
 					// ... additional record entries ??
@@ -135,34 +139,8 @@ export default class ObsidianNunjaPlugin extends Plugin {
 				true
 			);
 
-			//const noteRecord = this.#noteRecord(file)
-			// environment.addGlobal('title', () => {
-			// 	const noteRecord = this.#noteRecord(file)
-			// 	let title = noteRecord.metadata.frontmatter!["title"] || noteRecord.basename;
-			// 	const h1s = noteRecord.metadata.headings!.filter((h) => h.level === 1);
-			// 	return h1s.length ? h1s[0].heading : title;
-			// });
-			// environment.addGlobal('tags', () => {
-			// 	const noteRecord = this.#noteRecord(file);
-			// 	return [
-			// 		...noteRecord.metadata.tags!.map((t) => t.tag.substring(1)),
-			// 		...noteRecord.metadata.frontmatter!.tags
-			// 	]
-			// });
-			// environment.addGlobal('links', () => {
-			// 	const noteRecord = this.#noteRecord(file)
-			// 	return [
-			// 		...noteRecord.metadata.links!,
-			// 		...noteRecord.metadata.frontmatterLinks!
-			// 	]
-			// });
-			//environment.addGlobal('app', () => this.app);
+
 			environment.addGlobal('context', () => context);
-			//environment.addGlobal("date", getCurrentDate);
-			//environment.addGlobal("time", getCurrentTime);
-			//environment.addGlobal("timestamp", getCurrentTimestamp);
-
-
 			environment.renderString(source, context, (err, rendered) => {
 				if (err) {
 					rendered = "Unable to render template. " + err.message

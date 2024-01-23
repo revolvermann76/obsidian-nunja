@@ -1,11 +1,11 @@
-// // @ts-nocheck 
+// @ts-nocheck 
 // import daily from "./notes/Daily Note.md";
 // import template from "./notes/Template Note.md";
-// import simpleNote from "./notes/Simple Note.md";
+import simpleNote from "./notes/simple note.md";
 
 // // ---------------------
 
-// import callout from "./snippets/Callout.md";
+import callout from "./snippets/callout.md";
 // import checkbox from "./snippets/Checkbox.md";
 // import codeblock from "./snippets/Codeblock.md";
 // import codeblockBash from "./snippets/Codeblock Bash.md";
@@ -20,12 +20,7 @@
 // import htmlIFrame from "./snippets/HTML IFrame.md";
 // import htmlPagebreak from "./snippets/HTML PageBreak.md";
 // import dataviewReference from "./snippets/List reference notes.md";
-// import mermaidClass from "./snippets/Mermaid Class Diagram.md";
-// import mermaidGantt from "./snippets/Mermaid Gantt Diagram.md";
-// import mermaidGraph from "./snippets/Mermaid Graph Diagram.md";
-// import mermaidMindmap from "./snippets/Mermaid Mind Map.md";
-// import mermaidPie from "./snippets/Mermaid Pie Chart.md";
-// import mermaidXY from "./snippets/Mermaid XY Chart.md"
+import mermaid from "./snippets/mermaid.md";
 // import table from "./snippets/Table.md";
 // import task from "./snippets/Task.md";
 // import phone from "./snippets/Telephone.md";
@@ -34,14 +29,14 @@
 
 export const examples: { [key: string]: { [key: string]: string } } = {
 	notes: {
-		// "Daily Note": daily,
-		// "Template Note": template,
-		// "Simple Note": simpleNote
+		// "daily note": daily,
+		"simple note": simpleNote,
+		// "template note": template,
 	},
 	snippets: {
-		// Callout: callout,
-		// Codeblock: codeblock,
-		// Checkbox: checkbox,
+		callout: callout,
+		// codeblock: codeblock,
+		// checkbox: checkbox,
 		// "Codeblock Bash": codeblockBash,
 		// "Codeblock Javascript": codeblockJS,
 		// "Codeblock Python": codeblockPython,
@@ -54,12 +49,7 @@ export const examples: { [key: string]: { [key: string]: string } } = {
 		// "HTML IFrame": htmlIFrame,
 		// "HTML Pagebreak": htmlPagebreak,
 		// "Dataview Referencing Notes": dataviewReference,
-		// "Mermaid Class Diagram": mermaidClass,
-		// "Mermaid Gantt Diagram": mermaidGantt,
-		// "Mermaid Graph Diagram": mermaidGraph,
-		// "Mermaid Mindmap": mermaidMindmap,
-		// "Mermaid Pie Chart": mermaidPie,
-		// "Mermaid XY Chart": mermaidXY,
+		"mermaid": mermaid,
 		// Table: table,
 		// Task: task,
 		// Phone: phone

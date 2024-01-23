@@ -1,4 +1,3 @@
-import { TField } from "./TField";
 import { TTemplate } from "./TSnippet";
 
 export type TNote = TTemplate & {
