@@ -5,15 +5,13 @@ export type TField = {
 	key: string;
 };
 
-type TRangeEntry = string;
 
-type TRange = TRangeEntry[];
 
 export type TTextField = TField & {
 	type: "text";
 	preset?: string;
 	default?: string;
-	items?: TRange;
+	items?: { [key: string]: string };
 };
 
 export type TAreaField = TField & {
@@ -27,7 +25,7 @@ export type TAreaField = TField & {
 export type TChoiceField = TField & {
 	type: "choice";
 	preset?: string;
-	items: TRange;
+	items: { [key: string]: string };
 };
 
 export type TBooleanField = TField & {

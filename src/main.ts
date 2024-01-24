@@ -1,4 +1,4 @@
-import { CachedMetadata, Component, MarkdownPostProcessorContext, MarkdownRenderer, MarkdownView, Plugin, TFile, debounce } from "obsidian";
+import { CachedMetadata, Component, Editor, MarkdownPostProcessorContext, MarkdownRenderer, MarkdownView, Plugin, TFile, debounce } from "obsidian";
 import * as obsidian from "obsidian";
 import { TPluginSettings } from "./types/TPluginSettings";
 import { TNote } from "./types/TNote";
@@ -10,6 +10,7 @@ import { getCurrentTime } from "./other/getCurrentTime";
 import { getCurrentTimestamp } from "./other/getCurrentTimestamp";
 import { AsyncFunction } from "./other/AsyncFunction";
 import { loadTemplates } from "./other/loadTemplates";
+import { SnippetModal } from "./modals/SnippetModal";
 
 const CODEFENCE_NAME = "nunja";
 
@@ -58,6 +59,15 @@ export default class ObsidianNunjaPlugin extends Plugin {
 			callback: async () => {
 				this.templates = await loadTemplates(this);
 				new Notification("Templates reloaded");
+			},
+		});
+
+		// This adds the "Insert snippet" editor command that can perform some operation on the current editor instance
+		this.addCommand({
+			id: "insert-snippet",
+			name: "Insert snippet",
+			editorCallback: (editor: Editor, view: MarkdownView) => {
+				new SnippetModal(this.app, this, editor, view).open();
 			},
 		});
 	}
@@ -114,7 +124,7 @@ export default class ObsidianNunjaPlugin extends Plugin {
 						const noteRecord = this.#noteRecord(file);
 						return [
 							...(noteRecord.metadata.tags || []).map((t) => t.tag.substring(1)),
-							...(noteRecord.metadata.frontmatter || {tags:[]}).tags
+							...(noteRecord.metadata.frontmatter || { tags: [] }).tags
 						]
 					},
 					links: () => {

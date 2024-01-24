@@ -19,7 +19,7 @@ fields:
   type: text
   preset: ''
   default: NOTE
-  key: callout-type
+  key: calloutType
   items: 
     Abstract: ABSTRACT
     Attention: ATTENTION
@@ -46,7 +46,7 @@ fields:
 - title: Title
   type: text
   preset: ''
-  key: callout-title
+  key: calloutTitle
   
 - title: Folding
   type: boolean
@@ -55,10 +55,10 @@ fields:
   
 javascript: |
   context.folding = context.folding ? "-" : "";
-  context["callout-type"] = context["callout-type"] || "NOTE";
+  context["calloutType"] = context["calloutType"] || "NOTE";
 
 # the nunjucks template
 template: |
-  > [!{{callout-type}}]{{folding}} {{callout-title}}
+  > [!{{calloutType}}]{{folding}} {{calloutTitle}}
   > {{selection}}{{cursor}}
 ```
