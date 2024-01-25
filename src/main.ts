@@ -22,8 +22,7 @@ const DEFAULT_SETTINGS: TPluginSettings = {
 	debug: false
 };
 
-// type t2 = Pick<TFile, 'basename' | 'name' | 'path' | 'extension'>
-// 	& Pick<CachedMetadata, 'frontmatter'>;
+
 
 
 
