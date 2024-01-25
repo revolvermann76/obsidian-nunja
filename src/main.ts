@@ -1,4 +1,4 @@
-import { CachedMetadata, Component, Editor, MarkdownPostProcessorContext, MarkdownRenderer, MarkdownView, Plugin, TFile, debounce } from "obsidian";
+import { Component, Editor, MarkdownPostProcessorContext, MarkdownRenderer, MarkdownView, Plugin, TFile, debounce } from "obsidian";
 import * as obsidian from "obsidian";
 import { TPluginSettings } from "./types/TPluginSettings";
 import { TNote } from "./types/TNote";
@@ -11,6 +11,7 @@ import { getCurrentTimestamp } from "./other/getCurrentTimestamp";
 import { AsyncFunction } from "./other/AsyncFunction";
 import { loadTemplates } from "./other/loadTemplates";
 import { SnippetModal } from "./modals/SnippetModal";
+import { noteRecord } from "./other/noteRecord";
 
 const CODEFENCE_NAME = "nunja";
 
@@ -24,13 +25,7 @@ const DEFAULT_SETTINGS: TPluginSettings = {
 // type t2 = Pick<TFile, 'basename' | 'name' | 'path' | 'extension'>
 // 	& Pick<CachedMetadata, 'frontmatter'>;
 
-type NoteMetadata = {
-	basename: string;
-	name: string;
-	path: string;
-	extension: string;
-	metadata: CachedMetadata;
-}
+
 
 export default class ObsidianNunjaPlugin extends Plugin {
 	settings: TPluginSettings;
@@ -93,11 +88,7 @@ export default class ObsidianNunjaPlugin extends Plugin {
 		return str;
 	}
 
-	#noteRecord(file: TFile): NoteMetadata {
-		const { basename, name, path, extension } = file;
-		const metadata = this.app.metadataCache.getFileCache(file) ?? {};
-		return { basename, name, path, extension, metadata };
-	}
+	
 
 	#blockHandler = debounce(
 		async (source: string, container: HTMLElement, ctx: MarkdownPostProcessorContext) => {
@@ -106,32 +97,34 @@ export default class ObsidianNunjaPlugin extends Plugin {
 			const file: TFile = this.app.workspace.getActiveFile() as TFile;
 
 			const context = {
-				...this.#noteRecord(file),
+				... noteRecord(file),
 				... {
 					global,
 					nunja: this,
 					app: this.app,
 					date: getCurrentDate,
 					title: () => {
-						const noteRecord = this.#noteRecord(file)
-						const title = noteRecord.metadata.frontmatter?.title || noteRecord.basename;
-						const h1s = (noteRecord.metadata.headings || []).filter((h) => h.level === 1);
+						const nRecord = noteRecord(file)
+						const title =
+							nRecord.metadata.frontmatter?.title ||
+							nRecord.basename;
+						const h1s = (nRecord.metadata.headings || []).filter((h) => h.level === 1);
 						return h1s.length ? h1s[0].heading : title;
 					},
 					time: getCurrentTime,
 					timestamp: getCurrentTimestamp,
 					tags: () => {
-						const noteRecord = this.#noteRecord(file);
+						const nRecord = noteRecord(file);
 						return [
-							...(noteRecord.metadata.tags || []).map((t) => t.tag.substring(1)),
-							...(noteRecord.metadata.frontmatter || { tags: [] }).tags
+							...(nRecord.metadata.tags || []).map((t) => t.tag.substring(1)),
+							...(nRecord.metadata.frontmatter || { tags: [] }).tags
 						]
 					},
 					links: () => {
-						const noteRecord = this.#noteRecord(file)
+						const nRecord = noteRecord(file)
 						return [
-							...(noteRecord.metadata.links || []),
-							...(noteRecord.metadata.frontmatterLinks || [])
+							...(nRecord.metadata.links || []),
+							...(nRecord.metadata.frontmatterLinks || [])
 						]
 					}
 					// ... additional record entries ??
@@ -151,14 +144,14 @@ export default class ObsidianNunjaPlugin extends Plugin {
 
 
 			environment.addGlobal('context', () => context);
-			environment.renderString(source, context, (err, rendered) => {
+			environment.renderString(source, context, (err, compiledString) => {
 				if (err) {
-					rendered = "Unable to render template. " + err.message
+					compiledString = "Unable to render template. " + err.message
 				}
 
 				MarkdownRenderer.render(
 					this.app,
-					rendered || "",
+					compiledString || "",
 					container,
 					ctx.sourcePath,
 					this.app.workspace.getActiveViewOfType(MarkdownView) as Component
@@ -169,5 +162,4 @@ export default class ObsidianNunjaPlugin extends Plugin {
 		250,
 	)
 }
-
 

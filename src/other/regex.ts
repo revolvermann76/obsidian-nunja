@@ -2,7 +2,7 @@
 
 // to find a "yaml handily" block
 export const regExYamlTemplate =
-	/```[\s^\n]*yaml[\s^\n]*nunja-template[\s^\n]*\n([\s\S]*?)\n```\n/mg;
+	/```[\s^\n]*yaml[\s^\n]*nunja-template[\s^\n]*\n([\s\S]*?)\n```/mg;
 
 // to find a "javascript handily" block
 export const regExJavascriptTemplate =

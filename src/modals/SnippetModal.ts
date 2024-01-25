@@ -4,12 +4,12 @@ import { MultiSuggest } from 'src/other/MultiSuggest';
 import { TSnippet } from 'src/types/TSnippet';
 import { getCurrentTimestamp } from 'src/other/getCurrentTimestamp';
 import { getCurrentTime } from 'src/other/getCurrentTime';
-import { findH1 } from 'src/other/findH1';
 import { getCurrentDate } from 'src/other/getCurrentDate';
 import { AsyncFunction } from 'src/other/AsyncFunction';
 import { processFields } from 'src/other/processFields';
 import * as nunjucks from 'nunjucks';
-
+import { noteRecord } from 'src/other/noteRecord';
+import * as obsidian from "obsidian";
 
 const cursorPosition = "Cvrs0rP05iti0n";
 
@@ -58,10 +58,11 @@ export class SnippetModal extends Modal {
 
 	/* lädt das ausgewählte Snippet und ermittelt ggf. die Inhalte der Fields */
 	async #onSelectSnippet(snippetName: string, list: boolean) {
-		const file: TFile = this.view.file as TFile;
 		if (!list) { // Wenn die Auswahl nicht aus dem Autosuggest heraus erfolgte, tue nichts
 			return;
 		}
+		const environment = nunjucks.configure({}); // eine neue Instanz 
+		const file: TFile = this.view.file as TFile;
 		this.titleEl.innerHTML = snippetName; // die Überschrift des Dialogs wird auf den Namen des Snippets gesetzt
 		this.#snippetInput.style.display = "none"; // das Eingabeelement wird nicht mehr benötigt und ausgeblendet
 		const snippet = this.plugin.templates.snippets // das gewählte Snippet wird anhand von Titel oder Alias gefunden
@@ -82,20 +83,68 @@ export class SnippetModal extends Modal {
 		const templateString = snippet.template || "";
 		const js = snippet.javascript || "";
 		const selectedText = this.editor.getSelection() || ""; // eventuell hatte der Benutzer zuvor Text selektiert
-		const environment = nunjucks.configure({}); // eine neue Instanz 
-		const title = findH1(this.editor.getValue()) || file.basename;
 
 		const context: { [key: string]: unknown } = {
-			selection: selectedText,
-			filename: file.name,
-			path: file.path,
-			title: title,
-			timestamp: getCurrentTimestamp(),
-			date: getCurrentDate(),
-			time: getCurrentTime(false),
-			timeFull: getCurrentTime(true),
-			metadata: this.app.metadataCache.getFileCache(file)
+			...noteRecord(file),
+			...{
+				selection: selectedText,
+				global,
+				nunja: this.plugin,
+				app: this.app,
+				date: getCurrentDate,
+
+				filename: file.name,
+				path: file.path,
+				title: () => {
+					const nRecord = noteRecord(file);
+					const title =
+						nRecord.metadata.frontmatter?.title || nRecord.basename;
+					const h1s = (nRecord.metadata.headings || []).filter(
+						(h) => h.level === 1
+					);
+					return h1s.length ? h1s[0].heading : title;
+				},
+				time: getCurrentTime,
+				timestamp: getCurrentTimestamp,
+				tags: () => {
+					const nRecord = noteRecord(file);
+					return [
+						...(nRecord.metadata.tags || []).map((t) =>
+							t.tag.substring(1)
+						),
+						...(nRecord.metadata.frontmatter || { tags: [] }).tags,
+					];
+				},
+				links: () => {
+					const nRecord = noteRecord(file);
+					return [
+						...(nRecord.metadata.links || []),
+						...(nRecord.metadata.frontmatterLinks || []),
+					];
+				},
+				// ... additional record entries ??
+			},
 		};
+
+		environment.addFilter(
+			"js",
+			function (js, callback) {
+				const fn = new AsyncFunction(
+					"context",
+					"obsidian",
+					"nunja",
+					js
+				);
+				fn(context, obsidian, environment).then(
+					(result: unknown) => {
+						callback(null, result);
+					}
+				);
+			},
+			true
+		);
+
+		environment.addGlobal("context", () => context);
 
 		// wenn das Snippet fields hat, werden diese nun zur Anzeige gebracht und deren Werte in Erfahrung gebracht
 		if (snippet.fields && snippet.fields.length) {
@@ -129,25 +178,36 @@ export class SnippetModal extends Modal {
 		if (this.plugin.settings.debug) { console.debug(context) }
 
 		// das Template wird kompiliert
-		const compiledString = environment.renderString(templateString, context);
+		environment.renderString(
+			templateString,
+			context,
+			(err, compiledString) => {
+				if (err) {
+					compiledString =
+						"Unable to render template. " + err.message;
+				}
 
-		// der kompilierte String wird an der (ersten) Cursorposition aufgesplittet
-		const cursorParts = compiledString.split(cursorPosition);
-		const before = cursorParts[0];
-		cursorParts.shift();
-		const after = cursorParts.join();
+				compiledString = compiledString || "";
 
-		// der Teil vor dem Cursor wird im Editor eingefügt
-		this.editor.replaceSelection(before);
+				// der kompilierte String wird an der (ersten) Cursorposition aufgesplittet
+				const cursorParts = compiledString.split(cursorPosition);
+				const before = cursorParts[0];
+				cursorParts.shift();
+				const after = cursorParts.join();
 
-		// die neue Cursorposition wird gespeichert
-		const pos = this.editor.getCursor()
+				// der Teil vor dem Cursor wird im Editor eingefügt
+				this.editor.replaceSelection(before);
 
-		// der Teil hinter dem Cursor wird im Editor eingefügt
-		this.editor.replaceSelection(after);
+				// die neue Cursorposition wird gespeichert
+				const pos = this.editor.getCursor();
 
-		// der Cursor wird an die gewünschte Position gesetzt
-		this.editor.setCursor(pos);
+				// der Teil hinter dem Cursor wird im Editor eingefügt
+				this.editor.replaceSelection(after);
+
+				// der Cursor wird an die gewünschte Position gesetzt
+				this.editor.setCursor(pos);
+			}
+		);
 	}
 
 	onClose() {
