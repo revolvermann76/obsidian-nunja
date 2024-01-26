@@ -12,6 +12,7 @@ import { AsyncFunction } from "./other/AsyncFunction";
 import { loadTemplates } from "./other/loadTemplates";
 import { SnippetModal } from "./modals/SnippetModal";
 import { noteRecord } from "./other/noteRecord";
+import { NewPageModal } from "./modals/NewPageModal";
 
 const CODEFENCE_NAME = "nunja";
 
@@ -21,10 +22,6 @@ const DEFAULT_SETTINGS: TPluginSettings = {
 	defaultOpenBehavior: true,
 	debug: false
 };
-
-
-
-
 
 export default class ObsidianNunjaPlugin extends Plugin {
 	settings: TPluginSettings;
@@ -62,6 +59,15 @@ export default class ObsidianNunjaPlugin extends Plugin {
 			name: "Insert snippet",
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				new SnippetModal(this.app, this, editor, view).open();
+			},
+		});
+
+		// add the command "New note from template" that can be triggered anywhere
+		this.addCommand({
+			id: "new-note",
+			name: "New note from template",
+			callback: () => {
+				new NewPageModal(this.app, this).open();
 			},
 		});
 	}
