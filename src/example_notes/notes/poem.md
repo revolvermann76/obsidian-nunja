@@ -9,7 +9,7 @@ type: note
 # if no title is given, the filename is used as the title
 # when there are more than one template in a file, 
 # a title is mandatory
-title: simple note
+title: poem
 
 # the nunjucks template
 template: |

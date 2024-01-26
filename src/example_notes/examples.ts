@@ -1,3 +1,4 @@
+//@ts-nocheck 
 import address from "./notes/address.md";
 import application from "./notes/application.md";
 import band from "./notes/band.md";
