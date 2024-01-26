@@ -37,6 +37,7 @@ type: snippet
 # the title. when there are more than one template 
 # in a file, a title is mandatory
 title: task
+
 alias: todo
 
 # the template will show some input-fields to gather more info for the template

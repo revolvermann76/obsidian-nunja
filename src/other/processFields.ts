@@ -120,6 +120,11 @@ export function processFields(this: Modal, fields: TField[]): Promise<{ [key: st
                             dropdown.setValue(choiceField.preset);
                             result[choiceField.key] = choiceField.preset;
                         }
+                        result[choiceField.key] = dropdown.getValue();
+                        dropdown.onChange(()=>{
+                            result[choiceField.key] = dropdown.getValue();
+                            console.log("xxxxx", choiceField.key, dropdown.getValue())
+                        });
                     });
             }
             if (i === 0) {

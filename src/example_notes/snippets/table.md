@@ -1,4 +1,4 @@
-# Table
+# Dataview
 
 ```yaml nunja-template
 # a nunja template-type can be `note` or `snippet`

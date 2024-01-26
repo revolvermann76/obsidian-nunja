@@ -1,4 +1,4 @@
-# Simple note
+# address
 
 ```yaml nunja-template
 # a nunja template-type can be `note` or `snippet`
@@ -9,15 +9,22 @@ type: note
 # if no title is given, the filename is used as the title
 # when there are more than one template in a file, 
 # a title is mandatory
-title: simple note
+title: address
 
 # the nunjucks template
 template: |
   ---
-  created: "{{date()}} {{time()}}"
-  title: "{{title()}}"
+  created: {{date()}} {{time()}}
+  title: {{title()}}
+  type: "[[address]]"
   ---
-  # {{title()}}
+  # {{title()}}🗺️📍
 
-  {{cursor}}
+  street:: {{cursor}}
+  town:: 
+  country:: 
+  zip:: 
+  phone:: 
+  mobile-phone:: 
+  email:: 
 ```

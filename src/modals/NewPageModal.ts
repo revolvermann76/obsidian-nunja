@@ -125,6 +125,13 @@ export class NewPageModal extends Modal {
             console.debug(noteTemplateTitle, noteTemplate);
         }
 
+		if(noteTemplate.destination) {
+			noteTemplate.destination = noteTemplate.destination.replace(
+				"$$templateFolder$$",
+				this.plugin.settings.templatePath
+			);
+		}
+
 		const folderPath = normalizePath(
 			noteTemplate.destination
 				? noteTemplate.destination

@@ -1,4 +1,4 @@
-# Simple note
+# poem
 
 ```yaml nunja-template
 # a nunja template-type can be `note` or `snippet`
@@ -16,8 +16,12 @@ template: |
   ---
   created: "{{date()}} {{time()}}"
   title: "{{title()}}"
+  type: "[[poem]]"
   ---
-  # {{title()}}
+  # {{title()}}📜🪶
 
-  {{cursor}}
+  poet:: {{cursor}}
+  year:: 
+
 ```
+

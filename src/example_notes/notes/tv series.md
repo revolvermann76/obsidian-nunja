@@ -1,4 +1,4 @@
-# Simple note
+# tv series
 
 ```yaml nunja-template
 # a nunja template-type can be `note` or `snippet`
@@ -9,15 +9,30 @@ type: note
 # if no title is given, the filename is used as the title
 # when there are more than one template in a file, 
 # a title is mandatory
-title: simple note
+title: tv series
 
 # the nunjucks template
 template: |
   ---
   created: "{{date()}} {{time()}}"
   title: "{{title()}}"
+  type: "[[tv series]]"
+  regie: 
+  releaseYear: 
+  publisher: 
   ---
   # {{title()}}
-
+  
+  %% picture %%
+  
   {{cursor}}
+  
+  ## cast
+  
+  | Actor | Role |
+  | ----- | ---- |
+  |       |      |
+  
+  ## summary
+
 ```
