@@ -40,24 +40,28 @@ export class NewPageModal extends Modal {
 		this.titleEl.innerHTML = "Create a new note"; // a header for our dialog
 
 		// we want to know the title of the new file
-		new Setting(this.contentEl).setName("Note title").addText((text) => {
-			text.setPlaceholder(timeStamp);
-			text.inputEl.style.width = "100%";
-			text.inputEl.addEventListener("keydown", (ke: KeyboardEvent) => {
-				if (ke.key === "Enter") {
-					// whenn the user hits return
-					ke.preventDefault();
-					this.#onSelect(
-						// we create a simple note ..
-						title || timeStamp, // with the given title or a timestamp if we dont have a title
-						"Simple Note"
-					);
-				}
-			});
-			text.onChange((value: string) => {
-				title = value; // lets save the title, maybe we'll need it later ;)
-			});
-		});
+		new Setting(this.contentEl)
+			.setName("Note title")
+			.setDesc("Type # to replace the existing note.")
+			.addText((text) => {
+				text.setPlaceholder(timeStamp);
+				text.inputEl.style.width = "100%";
+				text.inputEl.addEventListener("keydown", (ke: KeyboardEvent) => {
+					if (ke.key === "Enter") {
+						// whenn the user hits return
+						ke.preventDefault();
+						this.#onSelect(
+							// we create a simple note ..
+							title || timeStamp, // with the given title or a timestamp if we dont have a title
+							"Simple Note"
+						);
+					}
+				});
+				text.onChange((value: string) => {
+					title = value; // lets save the title, maybe we'll need it later ;)
+				});
+			}
+			);
 
 		// we want to know, which template should be used
 		new Setting(this.contentEl).setName("Template").addText((text) => {
@@ -87,8 +91,7 @@ export class NewPageModal extends Modal {
 
 	async #onSelect(title: string, noteTemplateTitle: string) {
 		this.contentEl.empty();
-		this.titleEl.innerHTML = noteTemplateTitle;
-		const filename = cleanStringForLinuxFilename(title) + ".md";
+
 
 		let noteTemplate = this.plugin.templates.notes // die gewählte Note wird anhand von Template-Titel oder Alias gefunden
 			.filter((note: TNote) => {
@@ -104,6 +107,28 @@ export class NewPageModal extends Modal {
 				return false;
 			})[0];
 
+		let folderPath = normalizePath(
+			noteTemplate.destination
+				? noteTemplate.destination
+				: this.plugin.settings.defaultOutputPath
+		);
+
+
+		if (title === "#") {
+			const f = this.app.workspace.getActiveFile();
+			if (f) {
+				title = f.basename;
+				folderPath = f.path.replace(f.name, "");
+			} else {
+				title = getCurrentTimestamp();
+			}
+		}
+		let filename = cleanStringForLinuxFilename(title) + ".md";
+		let filePath = normalizePath(path.join(folderPath, filename));
+
+		this.titleEl.innerHTML = noteTemplateTitle;
+
+
 		const simpleNote = this.plugin.templates.notes // die gewählte Note wird anhand von Template-Titel oder Alias gefunden
 			.filter((note: TNote) => {
 				if (note.title === "simple note") {
@@ -112,8 +137,8 @@ export class NewPageModal extends Modal {
 				return false;
 			})[0];
 
-        regExYamlTemplate.lastIndex = 0;
-        const matches = regExYamlTemplate.exec(examples.notes["simple note"]);
+		regExYamlTemplate.lastIndex = 0;
+		const matches = regExYamlTemplate.exec(examples.notes["simple note"]);
 		const simpleNoteExample = loadTemplate(
 			"simple note",
 			matches ? matches[1] : ""
@@ -121,23 +146,18 @@ export class NewPageModal extends Modal {
 
 		noteTemplate = noteTemplate || simpleNote || simpleNoteExample;
 
-        if (this.plugin.settings.debug) {
-            console.debug(noteTemplateTitle, noteTemplate);
-        }
+		if (this.plugin.settings.debug) {
+			console.debug(noteTemplateTitle, noteTemplate);
+		}
 
-		if(noteTemplate.destination) {
+		if (noteTemplate.destination) {
 			noteTemplate.destination = noteTemplate.destination.replace(
 				"$$templateFolder$$",
 				this.plugin.settings.templatePath
 			);
 		}
 
-		const folderPath = normalizePath(
-			noteTemplate.destination
-				? noteTemplate.destination
-				: this.plugin.settings.defaultOutputPath
-		);
-		const filePath = normalizePath(path.join(folderPath, filename));
+
 
 		// alle Teile des Snippets, die zum Kompilieren des Templates nötig sind, werden zusammengetragen
 		const templateString = noteTemplate.template || "";
@@ -237,46 +257,46 @@ export class NewPageModal extends Modal {
 
 				compiledString = compiledString || "";
 
-                const open =
+				const open =
 					noteTemplate.open ||
 					this.plugin.settings.defaultOpenBehavior;
-                const pos = findPosition(
-                    compiledString,
-                    cursorPosition
-                );
-                compiledString = compiledString.replaceAll(
-                    cursorPosition,
-                    ""
-                );
-                writeStringToFile(
-                    context.path as string,
-                    compiledString,
-                    this.app
-                ).then(()=>{
+				const pos = findPosition(
+					compiledString,
+					cursorPosition
+				);
+				compiledString = compiledString.replaceAll(
+					cursorPosition,
+					""
+				);
+				writeStringToFile(
+					context.path as string,
+					compiledString,
+					this.app
+				).then(() => {
 
-                    if (open) {
-                        console.log("open", open);
-                        const tFile = this.app.vault.getAbstractFileByPath(
-                            context.path as string
-                        ) as TFile;
-                        const leaf =
-                            open === "tab"
-                                ? this.app.workspace.getLeaf(true)
-                                : this.app.workspace.getMostRecentLeaf() ||
-                                    this.app.workspace.getLeaf(true);
-                        leaf.openFile(tFile).then(()=>{
-                            const view =
-                                this.app.workspace.getActiveViewOfType(
-                                    MarkdownView
-                                );
-                            const editor = view?.editor as Editor;
-                            if (pos) {
-                                editor.setCursor(pos);
-                            }
-                            editor.focus();
-                        });
-                    }
-                })
+					if (open) {
+						console.log("open", open);
+						const tFile = this.app.vault.getAbstractFileByPath(
+							context.path as string
+						) as TFile;
+						const leaf =
+							open === "tab"
+								? this.app.workspace.getLeaf(true)
+								: this.app.workspace.getMostRecentLeaf() ||
+								this.app.workspace.getLeaf(true);
+						leaf.openFile(tFile).then(() => {
+							const view =
+								this.app.workspace.getActiveViewOfType(
+									MarkdownView
+								);
+							const editor = view?.editor as Editor;
+							if (pos) {
+								editor.setCursor(pos);
+							}
+							editor.focus();
+						});
+					}
+				})
 			}
 		);
 	}
