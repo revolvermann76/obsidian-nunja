@@ -53,7 +53,7 @@ export class NewPageModal extends Modal {
 						this.#onSelect(
 							// we create a simple note ..
 							title || timeStamp, // with the given title or a timestamp if we dont have a title
-							"Simple Note"
+							"simple note"
 						);
 					}
 				});
@@ -65,7 +65,7 @@ export class NewPageModal extends Modal {
 
 		// we want to know, which template should be used
 		new Setting(this.contentEl).setName("Template").addText((text) => {
-			text.setPlaceholder("Simple Note");
+			text.setPlaceholder("simple note");
 			text.inputEl.style.width = "100%";
 
 			// the input element gets extended with a MultiSuggest, to suggest the note templates, that we have
@@ -73,7 +73,7 @@ export class NewPageModal extends Modal {
 				text.inputEl,
 				(selected, list) => {
 					if (!list && !templateNames.contains(selected)) {
-						selected = "Simple Note"; // lets say its a simple note if we are unable the find a matching tempate
+						selected = "simple note"; // lets say its a simple note if we are unable the find a matching tempate
 					}
 					this.#onSelect(title || timeStamp, selected); // lets get into the next phase
 				},
@@ -123,8 +123,8 @@ export class NewPageModal extends Modal {
 				title = getCurrentTimestamp();
 			}
 		}
-		let filename = cleanStringForLinuxFilename(title) + ".md";
-		let filePath = normalizePath(path.join(folderPath, filename));
+		const filename = cleanStringForLinuxFilename(title) + ".md";
+		const filePath = normalizePath(path.join(folderPath, filename));
 
 		this.titleEl.innerHTML = noteTemplateTitle;
 
