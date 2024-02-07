@@ -25,6 +25,7 @@ const copyPlugin = () => ({
 				"main.js",
 				"styles.css"
 			];
+
 			createDirectoryIfNotExists(pathOut);
 			for (let i = 0; i < files.length; i++) {
 				try {
