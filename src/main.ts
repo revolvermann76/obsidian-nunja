@@ -13,6 +13,8 @@ import { loadTemplates } from "./other/loadTemplates";
 import { SnippetModal } from "./modals/SnippetModal";
 import { noteRecord } from "./other/noteRecord";
 import { NewPageModal } from "./modals/NewPageModal";
+import { NoteHandler } from "./other/NoteHandler";
+import { getNormalizedFolderPath } from "./other/getNormalizedFolderPath";
 
 const CODEFENCE_NAME = "nunja";
 
@@ -35,6 +37,21 @@ export default class ObsidianNunjaPlugin extends Plugin {
 			// wait for the layout to be ready before loading the templates, because
 			// we need some Obsidian data-caches to be filled first
 			this.templates = await loadTemplates(this);
+
+			this.registerEvent(
+				this.app.vault.on("create", (f: TFile) => {
+					console.log(f);
+					for(let i = 0; i < this.templates.notes.length; i++){
+						const noteTemplate : TNote = this.templates.notes[i];
+						if (
+							getNormalizedFolderPath(f) === noteTemplate.monitor
+						) {
+							new NoteHandler(this.app, this, f, noteTemplate);
+							break;
+						}
+					}
+				})
+			);
 		});
 
 		this.registerMarkdownCodeBlockProcessor(
@@ -70,6 +87,8 @@ export default class ObsidianNunjaPlugin extends Plugin {
 				new NewPageModal(this.app, this).open();
 			},
 		});
+
+
 	}
 
 	/** load settings, wenn the Plugin gets loaded */
@@ -161,7 +180,6 @@ export default class ObsidianNunjaPlugin extends Plugin {
 					ctx.sourcePath,
 					this.app.workspace.getActiveViewOfType(MarkdownView) as Component
 				)
-				//container.innerHTML = rendered || "";
 			});
 		},
 		250,

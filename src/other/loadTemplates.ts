@@ -6,6 +6,7 @@ import { TNote } from "src/types/TNote";
 import { TSnippet, TTemplate } from "src/types/TSnippet";
 import { findMarkdownFiles } from "./findMarkdownFiles";
 import { regExYamlTemplate } from "./regex";
+import { normalizePath } from "./normalizePath";
 
 
 /** loads a single template */
@@ -67,9 +68,11 @@ export async function loadTemplates(plugin: ObsidianNunjaPlugin): Promise<{ note
                         match[1]
                     ); // loads a single template
                     if (parsed) {
+                        // sort our templates by type
                         if (parsed.type === "note") {
-                            // sort our templates by type
-                            templates.notes.push(parsed as TNote);
+                            const note = parsed as TNote;
+                            note.monitor = note.monitor ? normalizePath(note.monitor) : undefined;
+                            templates.notes.push(note);
                         } else if (parsed.type === "snippet") {
                             templates.snippets.push(parsed as TSnippet);
                         }

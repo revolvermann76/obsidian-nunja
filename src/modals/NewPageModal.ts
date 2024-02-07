@@ -189,21 +189,7 @@ export class NewPageModal extends Modal {
 			// ... additional record entries ??
 		};
 
-		environment.addFilter(
-			"js",
-			function (js, callback) {
-				const fn = new AsyncFunction(
-					"context",
-					"obsidian",
-					"nunja",
-					js
-				);
-				fn(context, obsidian, environment).then((result: unknown) => {
-					callback(null, result);
-				});
-			},
-			true
-		);
+
 
 		// wenn das Snippet fields hat, werden diese nun zur Anzeige gebracht und deren Werte in Erfahrung gebracht
 		if (noteTemplate.fields && noteTemplate.fields.length) {
@@ -245,6 +231,24 @@ export class NewPageModal extends Modal {
 			console.debug(context);
 		}
 
+		environment.addFilter(
+			"js",
+			function (js, callback) {
+				const fn = new AsyncFunction(
+					"context",
+					"obsidian",
+					"nunja",
+					js
+				);
+				fn(context, obsidian, environment).then(
+					(result: unknown) => {
+						callback(null, result);
+					}
+				);
+			},
+			true
+		);
+		
 		// das Template wird kompiliert
 		environment.renderString(
 			templateString,
