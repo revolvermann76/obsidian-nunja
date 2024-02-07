@@ -5,7 +5,6 @@ import fs from "fs";
 import path from "path";
 import { readFile } from "fs/promises";
 
-
 function createDirectoryIfNotExists(directoryPath) {
 	if (!fs.existsSync(directoryPath)) {
 		fs.mkdirSync(directoryPath, { recursive: true });
@@ -13,14 +12,14 @@ function createDirectoryIfNotExists(directoryPath) {
 	}
 }
 
-
 const copyPlugin = () => ({
 	name: "copy-plugin",
 	setup(build) {
 		build.onEnd(async () => {
 			const pathIn = "./";
-			//const pathOut =	"D:/.obsidian/plugins/obsidian-nunja/";
-			const pathOut = "/home/marc/zettelkasten/.obsidian/plugins/obsidian-nunja/";
+			const pathOut =
+				"C:/Users/marc.jentsch/Development/GitHub/zettelkasten/.obsidian/plugins/obsidian-nunja/";
+			//const pathOut = "/home/marc/zettelkasten/.obsidian/plugins/obsidian-nunja/";
 			const files = [
 				"manifest.json",
 				"main.js",
