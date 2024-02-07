@@ -13,6 +13,13 @@ title: daily note
 
 open: true
 
+# If a file is created in the folder named in the "monitor" 
+# property, this template will automatically be applied 
+# to the new file. Uncomment the next line to make use
+# of that feature
+
+# monitor: path/to/folder
+
 javascript: |
   const today = new Date();
   const year = today.getFullYear();
