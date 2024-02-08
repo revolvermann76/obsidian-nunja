@@ -1,4 +1,4 @@
-import { Component, Editor, MarkdownPostProcessorContext, MarkdownRenderer, MarkdownView, Plugin, TFile, debounce } from "obsidian";
+import { Component, Editor, MarkdownPostProcessorContext, MarkdownRenderer, MarkdownView, Plugin, TFile } from "obsidian";
 import * as obsidian from "obsidian";
 import { TPluginSettings } from "./types/TPluginSettings";
 import { TNote } from "./types/TNote";
@@ -114,8 +114,7 @@ export default class ObsidianNunjaPlugin extends Plugin {
 
 	
 
-	#blockHandler = debounce(
-		async (source: string, container: HTMLElement, ctx: MarkdownPostProcessorContext) => {
+	#blockHandler = async (source: string, container: HTMLElement, ctx: MarkdownPostProcessorContext) => {
 
 			const environment = nunjucks.configure({});
 			const file: TFile = this.app.workspace.getActiveFile() as TFile;
@@ -181,8 +180,6 @@ export default class ObsidianNunjaPlugin extends Plugin {
 					this.app.workspace.getActiveViewOfType(MarkdownView) as Component
 				)
 			});
-		},
-		250,
-	)
+		}
 }
 

@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-nunja",
 	"name": "Nunja",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
 	"description": "Obsidian Plugin to use Nunjucks templates in Obsidian.",
 	"author": "Marc Langer",
