@@ -41,6 +41,9 @@ export default class ObsidianNunjaPlugin extends Plugin {
 			this.registerEvent(
 				this.app.vault.on("create", (f: TFile) => {
 					console.log(f);
+					if(f.stat.size > 0 ){
+						return;
+					}
 					for(let i = 0; i < this.templates.notes.length; i++){
 						const noteTemplate : TNote = this.templates.notes[i];
 						if (
